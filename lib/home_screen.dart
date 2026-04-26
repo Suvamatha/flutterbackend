@@ -1,5 +1,6 @@
 // import 'login_screen.dart';
 import 'package:flutter/material.dart';
+import 'api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   
@@ -11,14 +12,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController taskcontroller = TextEditingController();
-    final List<Map<String,dynamic>> tasks = [
+     List<Map<String,dynamic>> tasks = [
         {"title":"Buy groceries","done":false},
         {"title":"Complete Flutter app","done":false},
         {"title":"Read 20 pages","done":false},
         {"title":"Go for a walk","done":false},
     ];
 
-    void handleLogic(){
+    void handleLogic()async{
       String task = taskcontroller.text;
 
       if (task.isEmpty){
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         return;
       }
+      await ApiService.createTask(task);
+      await loadTasks();
       setState(() {
         tasks.add({"title":task,"done":false});
       });
@@ -41,7 +44,21 @@ class _HomeScreenState extends State<HomeScreen> {
     taskcontroller.dispose();
     super.dispose();
   }
-
+  @override
+  void initState(){
+    super.initState();
+    loadTasks();
+  }
+  Future<void> loadTasks()async{
+    try{
+    final data = await ApiService.getTasks();
+    print(data);
+    setState(() {
+      tasks = List<Map<String,dynamic>>.from(data);
+    });
+  }catch(e){
+    print("Error: $e");
+  }}
   @override
   Widget build(BuildContext context) {
 
@@ -64,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: (context,index){
                 final task = tasks[index];
                 return Dismissible(
-                  key: Key(task["title"]),
+                  key: Key(index.toString()),
                   onDismissed: (direction){
                     setState(() {
                       tasks.removeAt(index);
