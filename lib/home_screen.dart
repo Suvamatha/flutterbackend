@@ -12,12 +12,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController taskcontroller = TextEditingController();
-     List<Map<String,dynamic>> tasks = [
-        {"title":"Buy groceries","done":false},
-        {"title":"Complete Flutter app","done":false},
-        {"title":"Read 20 pages","done":false},
-        {"title":"Go for a walk","done":false},
-    ];
+     List<Map<String,dynamic>> tasks = [  ];
+
+    bool isLoading = false;
 
     void handleLogic()async{
       String task = taskcontroller.text;
@@ -30,9 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       await ApiService.createTask(task);
       await loadTasks();
-      setState(() {
-        tasks.add({"title":task,"done":false});
-      });
       taskcontroller.clear();
 
       Navigator.pop(
@@ -50,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     loadTasks();
   }
   Future<void> loadTasks()async{
+    setState(() => isLoading = true);
     try{
     final data = await ApiService.getTasks();
     print(data);
@@ -58,7 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }catch(e){
     print("Error: $e");
-  }}
+  }
+  setState(() => isLoading = false);
+}
   @override
   Widget build(BuildContext context) {
 
@@ -69,7 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text("Task Manager", style: TextStyle(fontWeight: FontWeight.bold),),
         centerTitle: true,
       ),
-      body: Padding(
+      body: isLoading
+      ? Center(child: CircularProgressIndicator())
+       :Padding(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
@@ -82,10 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 final task = tasks[index];
                 return Dismissible(
                   key: Key(index.toString()),
-                  onDismissed: (direction){
-                    setState(() {
-                      tasks.removeAt(index);
-                    });
+                  onDismissed: (direction) async{
+                    final id = tasks[index]["id"];
+                    await ApiService.deleteTask(id);
+                    await loadTasks();
                   },
                 child: ListTile(
                   leading: Icon(
@@ -94,10 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     : Icons.check_box_outline_blank
                   ),
                   title: Text(task["title"]),
-                  onTap: () {
-                    setState(() {
-                      tasks[index]["done"]= !tasks[index]["done"];
-                    });
+                  onTap: () async{
+                    final id =tasks[index]["id"];
+                    await ApiService.toggleTask(id);
+                    await loadTasks();
                   },
                 ),
                 );

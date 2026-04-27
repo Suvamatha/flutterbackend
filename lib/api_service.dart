@@ -18,8 +18,14 @@ class ApiService {
   static Future<void> createTask(String title) async{
     await http.post(
       Uri.parse('$baseUrl/tasks'),
-      headers: {"Content-Type":"application-JSON"},
+      headers: {"Content-Type":"application/JSON"},
       body: jsonEncode({"title":title}),
     );
+  }
+  static Future<void>deleteTask(int id)async{
+    await http.delete(Uri.parse('$baseUrl/tasks/$id'));
+  }
+  static Future<void>toggleTask(int id)async{
+    await http.patch(Uri.parse('$baseUrl/tasks/$id'));
   }
 }

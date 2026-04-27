@@ -1,10 +1,14 @@
 const express = require('express')
 const app = express();
 const cors = require('cors');
+const mongooes = require('mongoose');
 
 app.use(cors());
 app.use(express.json());
 
+mongooes.connect('mongodb://localhost:27017/taskmanager')
+.then(() => console.log("MongoDb is connected"))
+.catch((err) => console.log("DB Error: ", err))
 
 app.get('/',(req,res)=>{
     res.send("Task manager is running..");
