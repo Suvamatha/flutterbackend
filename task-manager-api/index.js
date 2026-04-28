@@ -2,11 +2,12 @@ const express = require('express')
 const app = express();
 const cors = require('cors');
 const mongooes = require('mongoose');
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
 
-mongooes.connect('mongodb://localhost:27017/taskmanager')
+mongooes.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDb is connected"))
 .catch((err) => console.log("DB Error: ", err))
 
@@ -14,30 +15,27 @@ app.get('/',(req,res)=>{
     res.send("Task manager is running..");
 });
 
-let tasks = [
-    {id:1, title: "Buy gloceries", done: false},
-    {id:2, title: "Learn Flutter", done: false},
-];
+let taskSchema = new mongooes.Schema({
+    title: String,
+    done: {type: Boolean, default: false},
+});
 
-app.get('/tasks',(req,res)=>{
+const Task = mongooes.model('Task',taskSchema);
+
+app.get('/tasks',async (req,res)=>{
+    const tasks = await Task.find();
     res.json(tasks);
 });
 //for Post
-app.post('/tasks',(req,res)=>{
-    const {title} = req.body;
+app.post('/tasks', async (req,res)=>{
+    const {title} =req.body;
 
     if(!title){
-        return res.status(400).json({message: "Title is requred"});
+        return res.status(400).json({message: "Title is required"});
     }
-
-    const newTask = {
-        id: tasks.length + 1,
-        title: title,
-        done: false,
-    };
-
-    tasks.push(newTask);
+    const newTask = await Task.create({title});
     res.status(201).json(newTask);
+    
 })
 
 //for DELETE
@@ -58,6 +56,6 @@ app.patch('/tasks/:id', (req,res)=>{
     res.json(task);
 });
 
-app.listen(3000,()=>{
-    console.log("Server is running in port 3000");
+app.listen(process.env.PORT,()=>{
+    console.log(`Server is running in port ${process.env.PORT}`);
 });
