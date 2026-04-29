@@ -2,10 +2,13 @@ const express = require('express')
 const app = express();
 const cors = require('cors');
 const mongooes = require('mongoose');
+const authRoutes = require('./auth');
+
 require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
+app.use('/auth', authRoutes);
 
 mongooes.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDb is connected"))
@@ -39,23 +42,32 @@ app.post('/tasks', async (req,res)=>{
 })
 
 //for DELETE
-app.delete('/tasks/:id',(req,res)=>{
-    const id = parseInt(req.params.id);
-    tasks = tasks.filter(task => tasks.id !== id);
+app.delete('/tasks/:id', async(req,res)=>{
+try{
+    await Task.findByIdAndDelete(req.params.id);
     res.json({message: "Task deleted"});
+}catch(err){
+    res.status(500).json({message: "Server error", error: err.message});
+}
 });
 
-app.patch('/tasks/:id', (req,res)=>{
-    const id =parseInt(req.params.id);
-    const task = tasks.find(task => task.id == id);
+app.patch('/tasks/:id', async (req,res)=>{
+try{
+    const task = await Task.findById(req.params.id);
 
     if(!task){
         return res.status(404).json({message: "Task not found"});
     }
     task.done = !task.done;
+    await task.save();
     res.json(task);
+}catch(err){
+    res.status(500).json({message: "Server error", error: err.message});
+}
 });
 
 app.listen(process.env.PORT,()=>{
     console.log(`Server is running in port ${process.env.PORT}`);
 });
+
+
