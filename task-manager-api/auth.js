@@ -25,4 +25,34 @@ router.post('/register', async (req, res) => {
   }
 });
 
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Step 1 — find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Step 2 — check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Wrong password" });
+    }
+
+    // Step 3 — create token
+    const token = jwt.sign(
+      { userId: user._id },        // what to store in token
+      process.env.JWT_SECRET,      // secret key to sign it
+      { expiresIn: '7d' }          // token expires in 7 days
+    );
+
+    res.json({ token });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 module.exports = router;

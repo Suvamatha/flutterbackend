@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_flutter/api_service.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handlelogic(){
+  void _handlelogic ()async{
 
     String email = emailController.text;
     String password = passwordController.text;
@@ -39,16 +40,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return;
   }
-      print("Email : ${emailController.text}");
-      print("Password: ${passwordController.text}");
-      print("Navigate to Home");
-
-      Navigator.pushReplacement(
+try{
+  final token = await ApiService.login(email, password);
+  print("Token: $token");
+        Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context)=> HomeScreen())
       );
+}catch(e){
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text("Login Failed - wrong email or password")),
+  );
+  }
 }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

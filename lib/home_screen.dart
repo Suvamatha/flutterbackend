@@ -1,5 +1,6 @@
 // import 'login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:project_flutter/login_screen.dart';
 import 'api_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -62,6 +63,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey,
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async{
+              await ApiService.deleteToken();
+              Navigator.pushReplacement(
+                context,
+              MaterialPageRoute(builder: (context)=> LoginScreen()),
+              );
+            },
+          )
+        ],
         backgroundColor: Colors.red,
         title: Text("Task Manager", style: TextStyle(fontWeight: FontWeight.bold),),
         centerTitle: true,
@@ -82,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Dismissible(
                   key: Key(index.toString()),
                   onDismissed: (direction) async{
-                    final id = tasks[index]["id"];
+                    final id = tasks[index]["_id"];
                     await ApiService.deleteTask(id);
                     await loadTasks();
                   },
@@ -94,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   title: Text(task["title"]),
                   onTap: () async{
-                    final id =tasks[index]["id"];
+                    final id =tasks[index]["_id"];
                     await ApiService.toggleTask(id);
                     await loadTasks();
                   },
