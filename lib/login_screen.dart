@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_flutter/api_service.dart';
+import 'package:project_flutter/signup_screen.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,8 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 try{
   final token = await ApiService.login(email, password);
+  await ApiService.saveToken(token);
+  print("Token saved");
   print("Token: $token");
-        Navigator.pushReplacement(
+  Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context)=> HomeScreen())
       );
@@ -91,6 +94,15 @@ try{
               child: Text("Login",),
             ),  
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignupScreen()),
+                );
+              },
+              child: Text("Don't have an account? Sign up"),
+            )
           ],
         ),
       ),
