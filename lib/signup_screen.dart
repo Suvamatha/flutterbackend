@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_flutter/api_service.dart';
+import 'package:project_flutter/login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -44,6 +45,19 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text("Password doesn't match"),),
       );
       return;
+    }
+    try{
+      await ApiService.register(email, password);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Sucess Snackbar"),),
+      );
+      Navigator.pushReplacement(context, 
+      MaterialPageRoute(builder: (context)=> LoginScreen())
+      );
+    }catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error Occured"))
+      );
     }
 
   }
