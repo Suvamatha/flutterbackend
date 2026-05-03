@@ -3,11 +3,11 @@ import 'package:project_flutter/api_service.dart';
 import 'package:project_flutter/home_screen.dart';
 import 'login_screen.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final token = await ApiService.getToken();
-
-  runApp(const MyApp(token: token));
+  
+  runApp(MyApp(token: token));
 }
 
 class MyApp extends StatelessWidget {
@@ -17,10 +17,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: token != null ? HomeScreen() : LoginScreen(),
+      title: 'Task Manager',
+      home: token != null && token!.isNotEmpty 
+          ? const HomeScreen() 
+          : const LoginScreen(),
       debugShowCheckedModeBanner: false,
-      
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+        useMaterial3: true,
+      ),
     );
   }
 }
-
