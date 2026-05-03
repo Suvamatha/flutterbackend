@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_flutter/api_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -18,6 +19,33 @@ class _SignupScreenState extends State<SignupScreen> {
     passwordController.dispose();
     confimPasswordController.dispose();
     super.dispose();
+  }
+
+  void _handleSignup() async{
+    String email = emailController.text;
+    String password = passwordController.text;
+    String confirm = confimPasswordController.text;
+
+    if (email.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Email can't be empty"),),
+      );
+      return;
+    }
+
+    if (password.length < 6){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Password bust be 6+ character"),),
+      );
+      return;
+    }
+    if (password!= confirm){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Password doesn't match"),),
+      );
+      return;
+    }
+
   }
 
   @override
